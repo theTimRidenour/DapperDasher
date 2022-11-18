@@ -136,7 +136,7 @@ int main()
         // jumping
         if (jumping) {
             if ((scarfyPos.y >= WIN_HEIGHT - scarfyRec.height && activePlayer == 0) ||
-                  santaPos.y >= WIN_HEIGHT - santaRec.height && activePlayer == 1) {
+                  (santaPos.y >= WIN_HEIGHT - santaRec.height && activePlayer == 1)) {
                 velocity = 0;
                 if (activePlayer == 0) { scarfyPos.y = WIN_HEIGHT - scarfyRec.height; }
                 if (activePlayer == 1) { santaPos.y = WIN_HEIGHT - santaRec.height; }
