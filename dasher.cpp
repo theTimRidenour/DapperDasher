@@ -1,5 +1,14 @@
 #include "raylib.h"
 
+struct AnimData
+{
+    Rectangle rec;
+    Vector2 pos;
+    int frame;
+    float updateTime;
+    float runningTime;
+};
+
 int main()
 {
     const int WIN_WIDTH = 512;
@@ -7,38 +16,54 @@ int main()
 
     InitWindow(WIN_WIDTH, WIN_HEIGHT, "Dapper Dasher");
 
-    // scarfy
     int velocity = 0;
-
-    // animation frame
-    int frame = 0;
-    int nebFrame = 0;
-    int neb2Frame = 0;
-    const float updateTime = 1.0/12.0;
-    const float nebUpdateTime{1.0/12.0};
-    const float neb2UpdateTime{1.0/16.0};
-    float runningTime = 0.0;
-    float nebRunningTime{0.0};
-    float neb2RunningTime{0.0};
 
     // textures
         // santa
         Texture2D santa = LoadTexture("textures/santa.png");
-        Rectangle santaRec{0.0, 0.0, santa.width/11, santa.height/2};
-        Vector2 santaPos{(WIN_WIDTH/2) - (santaRec.width/2), WIN_HEIGHT - santaRec.height};
+        AnimData santaData;
+            santaData.rec.width = santa.width/11;
+            santaData.rec.height = santa.height/2;
+            santaData.rec.x = 0;
+            santaData.rec.y = 0;
+            santaData.pos.x = (WIN_WIDTH/2) - (santaData.rec.width/2);
+            santaData.pos.y = WIN_HEIGHT - santaData.rec.height;
 
         // scarfy
         Texture2D scarfy = LoadTexture("textures/scarfy.png");
-        Rectangle scarfyRec{0.0, 0.0, scarfy.width/6, scarfy.height};
-        Vector2 scarfyPos{(WIN_WIDTH/2) - (scarfyRec.width/2), WIN_HEIGHT - scarfyRec.height};
+        AnimData scarfyData;
+            scarfyData.rec.width = scarfy.width/6;
+            scarfyData.rec.height = scarfy.height;
+            scarfyData.rec.x = 0;
+            scarfyData.rec.y = 0;
+            scarfyData.pos.x = (WIN_WIDTH/2) - (scarfyData.rec.width/2);
+            scarfyData.pos.y = WIN_HEIGHT - scarfyData.rec.height;
+            scarfyData.frame = 0;
+            scarfyData.updateTime = 1.0/12.0;
+            scarfyData.runningTime = 0.0;
 
         // nedula
         Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
-        Rectangle nebRec{0.0, 0.0, nebula.width/8, nebula.height/8};
-        Vector2 nebPos{WIN_WIDTH - nebRec.width, WIN_HEIGHT - nebRec.height};
-
-        Rectangle neb2Rec{0.0, 0.0, nebula.width/8, nebula.height/8};
-        Vector2 neb2Pos{WIN_WIDTH + 300, WIN_HEIGHT - neb2Rec.height};
+        AnimData neb1Data;
+            neb1Data.rec.width = nebula.width/8;
+            neb1Data.rec.height = nebula.height/8;
+            neb1Data.rec.x = 0;
+            neb1Data.rec.y = 0;
+            neb1Data.pos.x = WIN_WIDTH - neb1Data.rec.width;
+            neb1Data.pos.y = WIN_HEIGHT - neb1Data.rec.height;
+            neb1Data.frame = 0;
+            neb1Data.updateTime = 1.0/12.0;
+            neb1Data.runningTime = 0.0;
+        AnimData neb2Data;
+            neb2Data.rec.width = neb1Data.rec.width;
+            neb2Data.rec.height = neb1Data.rec.height;
+            neb2Data.rec.x = 0;
+            neb2Data.rec.y = 0;
+            neb2Data.pos.x = WIN_WIDTH + 300;
+            neb2Data.pos.y = neb1Data.pos.y;
+            neb2Data.frame = 0;
+            neb2Data.updateTime = 1.0/16.0;
+            neb2Data.runningTime = 0.0;
 
     // nebula X velocity (pixels/second)
     int nebVel{-200};
@@ -50,7 +75,7 @@ int main()
     // bool doubleJump = false;
 
     // active player (0 = scarfy, 1 = santa)
-    int activePlayer{0};
+    int activePlayer{1};
 
     SetTargetFPS(60);
 
@@ -60,124 +85,124 @@ int main()
 
         ClearBackground(WHITE);
         const float dT{ GetFrameTime() };
-        runningTime += dT;
-        nebRunningTime += dT;
-        neb2RunningTime += dT;
+        scarfyData.runningTime += dT;
+        neb1Data.runningTime += dT;
+        neb2Data.runningTime += dT;
 
         // update animation frames for characters
-        if (runningTime >= updateTime) {
-            if (activePlayer == 0) { scarfyRec.x = frame * scarfyRec.width; }
+        if (scarfyData.runningTime >= scarfyData.updateTime) {
+            if (activePlayer == 0) { scarfyData.rec.x = scarfyData.frame * scarfyData.rec.width; }
             if (activePlayer == 1 && !jumping) {
-                santaRec.x = frame * santaRec.width;
-                santaRec.y = 0;
+                santaData.rec.x = scarfyData.frame * santaData.rec.width;
+                santaData.rec.y = 0;
             } else if (activePlayer == 1 && jumping) {
                 if (velocity < 0) {
-                    santaRec.x = 0;
+                    santaData.rec.x = 0;
                 } else {
-                    santaRec.x = santaRec.width;
+                    santaData.rec.x = santaData.rec.width;
                 }
-                santaRec.y = santaRec.height;
+                santaData.rec.y = santaData.rec.height;
             }
-            if (!jumping) { frame++; }
+            if (!jumping) { scarfyData.frame++; }
 
             // frame update for scarfy
-            if (frame > 5 && activePlayer == 0) { frame = 0; }
+            if (scarfyData.frame > 5 && activePlayer == 0) { scarfyData.frame = 0; }
 
             // frame update for santa
-            if (frame > 10 && activePlayer == 1) { frame = 0; }
+            if (scarfyData.frame > 10 && activePlayer == 1) { scarfyData.frame = 0; }
             
-            runningTime = 0.0;
+            scarfyData.runningTime = 0.0;
         }
 
         // update animation frames from nebula 1
-        if (nebRunningTime >= updateTime) {
-            if (nebFrame >= 56) {
-                nebRec.y = 7 * nebRec.height;
-                nebRec.x = (nebFrame - 56) * nebRec.width;
-            } else if (nebFrame >= 48) {
-                nebRec.y = 6 * nebRec.height;
-                nebRec.x = (nebFrame - 48) * nebRec.width;
-            } else if (nebFrame >= 40) {
-                nebRec.y = 5 * nebRec.height;
-                nebRec.x = (nebFrame - 40) * nebRec.width;
-            } else if (nebFrame >= 32) {
-                nebRec.y = 4 * nebRec.height;
-                nebRec.x = (nebFrame - 32) * nebRec.width;
-            } else if (nebFrame >= 24) {
-                nebRec.y = 3 * nebRec.height;
-                nebRec.x = (nebFrame - 24) * nebRec.width;
-            } else if (nebFrame >= 16) {
-                nebRec.y = 2 * nebRec.height;
-                nebRec.x = (nebFrame - 16) * nebRec.width;
-            } else if (nebFrame >= 8) {
-                nebRec.y = nebRec.height;
-                nebRec.x = (nebFrame - 8) * nebRec.width;
+        if (neb1Data.runningTime >= neb1Data.updateTime) {
+            if (neb1Data.frame >= 56) {
+                neb1Data.rec.y = 7 * neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 56) * neb1Data.rec.width;
+            } else if (neb1Data.frame >= 48) {
+                neb1Data.rec.y = 6 * neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 48) * neb1Data.rec.width;
+            } else if (neb1Data.frame >= 40) {
+                neb1Data.rec.y = 5 * neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 40) * neb1Data.rec.width;
+            } else if (neb1Data.frame >= 32) {
+                neb1Data.rec.y = 4 * neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 32) * neb1Data.rec.width;
+            } else if (neb1Data.frame >= 24) {
+                neb1Data.rec.y = 3 * neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 24) * neb1Data.rec.width;
+            } else if (neb1Data.frame >= 16) {
+                neb1Data.rec.y = 2 * neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 16) * neb1Data.rec.width;
+            } else if (neb1Data.frame >= 8) {
+                neb1Data.rec.y = neb1Data.rec.height;
+                neb1Data.rec.x = (neb1Data.frame - 8) * neb1Data.rec.width;
             } else {
-                nebRec.y = 0;
-                nebRec.x = nebFrame * nebRec.width;
+                neb1Data.rec.y = 0;
+                neb1Data.rec.x = neb1Data.frame * neb1Data.rec.width;
             }
 
             // frame update for nebula
-            nebFrame++;
-            if (nebFrame > 60) { nebFrame = 0; }
-            nebRunningTime = 0.0;
+            neb1Data.frame++;
+            if (neb1Data.frame > 60) { neb1Data.frame = 0; }
+            neb1Data.runningTime = 0.0;
         }
 
         // update animation frames from nebula 2
-        if (neb2RunningTime >= updateTime) {
-            if (neb2Frame >= 56) {
-                neb2Rec.y = 7 * neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 56) * neb2Rec.width;
-            } else if (neb2Frame >= 48) {
-                neb2Rec.y = 6 * neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 48) * neb2Rec.width;
-            } else if (neb2Frame >= 40) {
-                neb2Rec.y = 5 * neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 40) * neb2Rec.width;
-            } else if (neb2Frame >= 32) {
-                neb2Rec.y = 4 * neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 32) * neb2Rec.width;
-            } else if (neb2Frame >= 24) {
-                neb2Rec.y = 3 * neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 24) * neb2Rec.width;
-            } else if (neb2Frame >= 16) {
-                neb2Rec.y = 2 * neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 16) * neb2Rec.width;
-            } else if (neb2Frame >= 8) {
-                neb2Rec.y = neb2Rec.height;
-                neb2Rec.x = (neb2Frame - 8) * neb2Rec.width;
+        if (neb2Data.runningTime >= neb2Data.updateTime) {
+            if (neb2Data.frame >= 56) {
+                neb2Data.rec.y = 7 * neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 56) * neb2Data.rec.width;
+            } else if (neb2Data.frame >= 48) {
+                neb2Data.rec.y = 6 * neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 48) * neb2Data.rec.width;
+            } else if (neb2Data.frame >= 40) {
+                neb2Data.rec.y = 5 * neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 40) * neb2Data.rec.width;
+            } else if (neb2Data.frame >= 32) {
+                neb2Data.rec.y = 4 * neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 32) * neb2Data.rec.width;
+            } else if (neb2Data.frame >= 24) {
+                neb2Data.rec.y = 3 * neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 24) * neb2Data.rec.width;
+            } else if (neb2Data.frame >= 16) {
+                neb2Data.rec.y = 2 * neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 16) * neb2Data.rec.width;
+            } else if (neb2Data.frame >= 8) {
+                neb2Data.rec.y = neb2Data.rec.height;
+                neb2Data.rec.x = (neb2Data.frame - 8) * neb2Data.rec.width;
             } else {
-                neb2Rec.y = 0;
-                neb2Rec.x = neb2Frame * neb2Rec.width;
+                neb2Data.rec.y = 0;
+                neb2Data.rec.x = neb2Data.frame * neb2Data.rec.width;
             }
 
             // frame update for nebula 2
-            neb2Frame++;
-            if (neb2Frame > 60) { neb2Frame = 0; }
-            neb2RunningTime = 0.0;
+            neb2Data.frame++;
+            if (neb2Data.frame > 60) { neb2Data.frame = 0; }
+            neb2Data.runningTime = 0.0;
         }
 
         // update nebula 1 position
-        nebPos.x += nebVel * dT;
-        if (nebPos.x < -nebRec.width) { nebPos.x = WIN_WIDTH; }
+        neb1Data.pos.x += nebVel * dT;
+        if (neb1Data.pos.x < -neb1Data.rec.width) { neb1Data.pos.x = WIN_WIDTH; }
 
         // update nebula 2 position
-        neb2Pos.x += nebVel * dT;
-        if(neb2Pos.x < -neb2Rec.width) { neb2Pos.x = WIN_WIDTH; }
+        neb2Data.pos.x += nebVel * dT;
+        if(neb2Data.pos.x < -neb2Data.rec.width) { neb2Data.pos.x = WIN_WIDTH; }
 
         // update scarfy's position
-        if (activePlayer == 0) { scarfyPos.y += velocity * dT; }
+        if (activePlayer == 0) { scarfyData.pos.y += velocity * dT; }
 
         // update santa's position
-        if (activePlayer == 1) { santaPos.y += velocity * dT; }
+        if (activePlayer == 1) { santaData.pos.y += velocity * dT; }
 
         // jumping
         if (jumping) {
-            if ((scarfyPos.y >= WIN_HEIGHT - scarfyRec.height && activePlayer == 0) ||
-                  (santaPos.y >= WIN_HEIGHT - santaRec.height && activePlayer == 1)) {
+            if ((scarfyData.pos.y >= WIN_HEIGHT - scarfyData.rec.height && activePlayer == 0) ||
+                  ( santaData.pos.y >= WIN_HEIGHT - santaData.rec.height && activePlayer == 1)) {
                 velocity = 0;
-                if (activePlayer == 0) { scarfyPos.y = WIN_HEIGHT - scarfyRec.height; }
-                if (activePlayer == 1) { santaPos.y = WIN_HEIGHT - santaRec.height; }
+                if (activePlayer == 0) { scarfyData.pos.y = WIN_HEIGHT - scarfyData.rec.height; }
+                if (activePlayer == 1) { santaData.pos.y = WIN_HEIGHT - santaData.rec.height; }
                 jumping = false;
                 // doubleJump = false;
             } else {
@@ -195,12 +220,12 @@ int main()
         }
 
         // draw characters
-        if (activePlayer == 0) { DrawTextureRec(scarfy, scarfyRec, scarfyPos, WHITE); }
-        if (activePlayer == 1) { DrawTextureRec(santa, santaRec, santaPos, WHITE);}
+        if (activePlayer == 0) { DrawTextureRec(scarfy, scarfyData.rec, scarfyData.pos, WHITE); }
+        if (activePlayer == 1) { DrawTextureRec(santa, santaData.rec, santaData.pos, WHITE);}
         
         // draw nebulas
-        DrawTextureRec(nebula, nebRec, nebPos, WHITE);
-        DrawTextureRec(nebula, neb2Rec, neb2Pos, RED);
+        DrawTextureRec(nebula, neb1Data.rec, neb1Data.pos, WHITE);
+        DrawTextureRec(nebula, neb2Data.rec, neb2Data.pos, RED);
 
         EndDrawing();
     }
