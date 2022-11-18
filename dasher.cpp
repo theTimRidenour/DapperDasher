@@ -36,7 +36,7 @@ int main()
     int nebVel{-200};
 
     // jumping
-    const int gravity = 1'000; // meters per second
+    const int gravity = 1'250; // meters per second
     const int jumpVel = -600;
     bool jumping = false;
     // bool doubleJump = false;
