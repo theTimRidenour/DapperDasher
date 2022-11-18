@@ -16,7 +16,7 @@ int main()
     int neb2Frame = 0;
     const float updateTime = 1.0/12.0;
     const float nebUpdateTime{1.0/12.0};
-    const float neb2UpdateTime{1.0/12.0};
+    const float neb2UpdateTime{1.0/16.0};
     float runningTime = 0.0;
     float nebRunningTime{0.0};
     float neb2RunningTime{0.0};
@@ -89,7 +89,7 @@ int main()
             runningTime = 0.0;
         }
 
-        // update animation frames from nebula
+        // update animation frames from nebula 1
         if (nebRunningTime >= updateTime) {
             if (nebFrame >= 56) {
                 nebRec.y = 7 * nebRec.height;
@@ -123,9 +123,47 @@ int main()
             nebRunningTime = 0.0;
         }
 
-        // update nebula position
+        // update animation frames from nebula 2
+        if (neb2RunningTime >= updateTime) {
+            if (neb2Frame >= 56) {
+                neb2Rec.y = 7 * neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 56) * neb2Rec.width;
+            } else if (neb2Frame >= 48) {
+                neb2Rec.y = 6 * neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 48) * neb2Rec.width;
+            } else if (neb2Frame >= 40) {
+                neb2Rec.y = 5 * neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 40) * neb2Rec.width;
+            } else if (neb2Frame >= 32) {
+                neb2Rec.y = 4 * neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 32) * neb2Rec.width;
+            } else if (neb2Frame >= 24) {
+                neb2Rec.y = 3 * neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 24) * neb2Rec.width;
+            } else if (neb2Frame >= 16) {
+                neb2Rec.y = 2 * neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 16) * neb2Rec.width;
+            } else if (neb2Frame >= 8) {
+                neb2Rec.y = neb2Rec.height;
+                neb2Rec.x = (neb2Frame - 8) * neb2Rec.width;
+            } else {
+                neb2Rec.y = 0;
+                neb2Rec.x = neb2Frame * neb2Rec.width;
+            }
+
+            // frame update for nebula 2
+            neb2Frame++;
+            if (neb2Frame > 60) { neb2Frame = 0; }
+            neb2RunningTime = 0.0;
+        }
+
+        // update nebula 1 position
         nebPos.x += nebVel * dT;
         if (nebPos.x < -nebRec.width) { nebPos.x = WIN_WIDTH; }
+
+        // update nebula 2 position
+        neb2Pos.x += nebVel * dT;
+        if(neb2Pos.x < -neb2Rec.width) { neb2Pos.x = WIN_WIDTH; }
 
         // update scarfy's position
         if (activePlayer == 0) { scarfyPos.y += velocity * dT; }
@@ -159,7 +197,10 @@ int main()
         // draw characters
         if (activePlayer == 0) { DrawTextureRec(scarfy, scarfyRec, scarfyPos, WHITE); }
         if (activePlayer == 1) { DrawTextureRec(santa, santaRec, santaPos, WHITE);}
+        
+        // draw nebulas
         DrawTextureRec(nebula, nebRec, nebPos, WHITE);
+        DrawTextureRec(nebula, neb2Rec, neb2Pos, RED);
 
         EndDrawing();
     }
