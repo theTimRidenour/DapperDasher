@@ -17,10 +17,9 @@ struct player
 
 int main()
 {
-    const int WIN_WIDTH = 512;
-    const int WIN_HEIGHT = 380;
+    const int WINDOW_DIMENSIONS[2]{512, 380}; // Width, Height
 
-    InitWindow(WIN_WIDTH, WIN_HEIGHT, "Dapper Dasher");
+    InitWindow(WINDOW_DIMENSIONS[0], WINDOW_DIMENSIONS[1], "Dapper Dasher");
 
     int velocity = 0;
 
@@ -29,7 +28,7 @@ int main()
         Texture2D santa = LoadTexture("textures/santa.png");
         AnimData santaData {
             {0.0, 0.0, (float)santa.width/11, (float)santa.height/2}, // rec
-            {(float)((WIN_WIDTH/2) - (santa.width/22)), (float)(WIN_HEIGHT - (santa.height/2))}, // pos
+            {(float)((WINDOW_DIMENSIONS[0]/2) - (santa.width/22)), (float)(WINDOW_DIMENSIONS[1] - (santa.height/2))}, // pos
             0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
         };
 
@@ -37,7 +36,7 @@ int main()
         Texture2D scarfy = LoadTexture("textures/scarfy.png");
         AnimData scarfyData {
             {0.0, 0.0, (float)scarfy.width/6, (float)scarfy.height}, // rec
-            {(float)((WIN_WIDTH/2) - (scarfy.width/12)), (float)(WIN_HEIGHT - scarfy.height)}, // pos
+            {(float)((WINDOW_DIMENSIONS[0]/2) - (scarfy.width/12)), (float)(WINDOW_DIMENSIONS[1] - scarfy.height)}, // pos
             0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
         };
 
@@ -47,13 +46,13 @@ int main()
         Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
         AnimData neb1Data {
             {0.0, 0.0, (float)nebula.width/8, (float)nebula.height/8}, // rec
-            {WIN_WIDTH, (float)(WIN_HEIGHT - (nebula.height/8))}, // pos
+            {(float)WINDOW_DIMENSIONS[0], (float)(WINDOW_DIMENSIONS[1] - (nebula.height/8))}, // pos
             0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
         };
 
         // nebula 2
         AnimData neb2Data {
-            neb1Data.rec, {WIN_WIDTH + 300, neb1Data.pos.y}, // rec, pos
+            neb1Data.rec, {(float)WINDOW_DIMENSIONS[0] + 300, neb1Data.pos.y}, // rec, pos
             0, 1.0/16.0, 0.0 // frame, updateTime, runningTime
         };
 
@@ -180,20 +179,20 @@ int main()
 
         // update nebula 1 position
         neb1Data.pos.x += nebVel * dT;
-        if (neb1Data.pos.x < -neb1Data.rec.width) { neb1Data.pos.x = WIN_WIDTH; }
+        if (neb1Data.pos.x < -neb1Data.rec.width) { neb1Data.pos.x = WINDOW_DIMENSIONS[0]; }
 
         // update nebula 2 position
         neb2Data.pos.x += nebVel * dT;
-        if(neb2Data.pos.x < -neb2Data.rec.width) { neb2Data.pos.x = WIN_WIDTH; }
+        if(neb2Data.pos.x < -neb2Data.rec.width) { neb2Data.pos.x = WINDOW_DIMENSIONS[0]; }
 
         // update player's position
         players[activePlayer].data.pos.y += velocity * dT;
 
         // jumping
         if (jumping) {
-            if (players[activePlayer].data.pos.y >= WIN_HEIGHT - players[activePlayer].data.rec.height) {
+            if (players[activePlayer].data.pos.y >= WINDOW_DIMENSIONS[1] - players[activePlayer].data.rec.height) {
                 velocity = 0;
-                players[activePlayer].data.pos.y = WIN_HEIGHT - players[activePlayer].data.rec.height;
+                players[activePlayer].data.pos.y = WINDOW_DIMENSIONS[1] - players[activePlayer].data.rec.height;
                 jumping = false;
                 // doubleJump = false;
             } else {
