@@ -9,6 +9,12 @@ struct AnimData
     float runningTime;
 };
 
+struct player
+{
+    Texture2D name;
+    AnimData data;
+};
+
 int main()
 {
     const int WIN_WIDTH = 512;
@@ -21,24 +27,35 @@ int main()
     // textures
         // santa
         Texture2D santa = LoadTexture("textures/santa.png");
-        AnimData santaData {{0.0, 0.0, (float)santa.width/11, (float)santa.height/2}, /* rec */
-            {(float)((WIN_WIDTH/2) - (santa.width/22)), (float)(WIN_HEIGHT - (santa.height/2))}}; // pos
+        AnimData santaData {
+            {0.0, 0.0, (float)santa.width/11, (float)santa.height/2}, // rec
+            {(float)((WIN_WIDTH/2) - (santa.width/22)), (float)(WIN_HEIGHT - (santa.height/2))}, // pos
+            0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
+        };
 
         // scarfy
         Texture2D scarfy = LoadTexture("textures/scarfy.png");
-        AnimData scarfyData {{0.0, 0.0, (float)scarfy.width/6, (float)scarfy.height}, /* rec */
-            {(float)((WIN_WIDTH/2) - (scarfy.width/12)), (float)(WIN_HEIGHT - scarfy.height)}, /* pos */
-            0, 1.0/12.0, 0.0}; // frame, updateTime, runningTime
+        AnimData scarfyData {
+            {0.0, 0.0, (float)scarfy.width/6, (float)scarfy.height}, // rec
+            {(float)((WIN_WIDTH/2) - (scarfy.width/12)), (float)(WIN_HEIGHT - scarfy.height)}, // pos
+            0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
+        };
+
+        player players[2]{{scarfy, scarfyData}, {santa, santaData}};
 
         // nedula 1
         Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
-        AnimData neb1Data {{0.0, 0.0, (float)nebula.width/8, (float)nebula.height/8}, /* rec */
-            {WIN_WIDTH, (float)(WIN_HEIGHT - (nebula.height/8))}, /* pos */
-            0, 1.0/12.0, 0.0}; // frame, updateTime, runningTime
+        AnimData neb1Data {
+            {0.0, 0.0, (float)nebula.width/8, (float)nebula.height/8}, // rec
+            {WIN_WIDTH, (float)(WIN_HEIGHT - (nebula.height/8))}, // pos
+            0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
+        };
 
         // nebula 2
-        AnimData neb2Data {neb1Data.rec, {WIN_WIDTH + 300, neb1Data.pos.y}, /* rec, pos */
-            0, 1.0/16.0, 0.0}; // frame, updateTime, runningTime
+        AnimData neb2Data {
+            neb1Data.rec, {WIN_WIDTH + 300, neb1Data.pos.y}, // rec, pos
+            0, 1.0/16.0, 0.0 // frame, updateTime, runningTime
+        };
 
     // nebula X velocity (pixels/second)
     int nebVel{-200};
@@ -58,35 +75,39 @@ int main()
     {
         BeginDrawing();
 
+        // switch player
+        if (IsKeyPressed(KEY_ONE)) { activePlayer = 0; }
+        if (IsKeyPressed(KEY_TWO)) { activePlayer = 1; }
+
         ClearBackground(WHITE);
         const float dT{ GetFrameTime() };
-        scarfyData.runningTime += dT;
+        players[activePlayer].data.runningTime += dT;
         neb1Data.runningTime += dT;
         neb2Data.runningTime += dT;
 
         // update animation frames for characters
-        if (scarfyData.runningTime >= scarfyData.updateTime) {
-            if (activePlayer == 0) { scarfyData.rec.x = scarfyData.frame * scarfyData.rec.width; }
+        if (players[activePlayer].data.runningTime >= players[activePlayer].data.updateTime) {
+            players[activePlayer].data.rec.x = 
+                players[activePlayer].data.frame * players[activePlayer].data.rec.width;
             if (activePlayer == 1 && !jumping) {
-                santaData.rec.x = scarfyData.frame * santaData.rec.width;
-                santaData.rec.y = 0;
+                players[1].data.rec.y = 0;
             } else if (activePlayer == 1 && jumping) {
                 if (velocity < 0) {
-                    santaData.rec.x = 0;
+                    players[1].data.rec.x = 0;
                 } else {
-                    santaData.rec.x = santaData.rec.width;
+                    players[1].data.rec.x = players[1].data.rec.width;
                 }
-                santaData.rec.y = santaData.rec.height;
+                players[1].data.rec.y = players[1].data.rec.height;
             }
-            if (!jumping) { scarfyData.frame++; }
+            if (!jumping) { players[activePlayer].data.frame++; }
 
-            // frame update for scarfy
-            if (scarfyData.frame > 5 && activePlayer == 0) { scarfyData.frame = 0; }
-
-            // frame update for santa
-            if (scarfyData.frame > 10 && activePlayer == 1) { scarfyData.frame = 0; }
+            // frame update for player
+            if ((activePlayer == 0 && players[activePlayer].data.frame > 5) ||
+                (activePlayer == 1 && players[activePlayer].data.frame >10)) {
+                    players[activePlayer].data.frame = 0;
+                }
             
-            scarfyData.runningTime = 0.0;
+            players[activePlayer].data.runningTime = 0.0;
         }
 
         // update animation frames from nebula 1
@@ -165,19 +186,14 @@ int main()
         neb2Data.pos.x += nebVel * dT;
         if(neb2Data.pos.x < -neb2Data.rec.width) { neb2Data.pos.x = WIN_WIDTH; }
 
-        // update scarfy's position
-        if (activePlayer == 0) { scarfyData.pos.y += velocity * dT; }
-
-        // update santa's position
-        if (activePlayer == 1) { santaData.pos.y += velocity * dT; }
+        // update player's position
+        players[activePlayer].data.pos.y += velocity * dT;
 
         // jumping
         if (jumping) {
-            if ((scarfyData.pos.y >= WIN_HEIGHT - scarfyData.rec.height && activePlayer == 0) ||
-                  ( santaData.pos.y >= WIN_HEIGHT - santaData.rec.height && activePlayer == 1)) {
+            if (players[activePlayer].data.pos.y >= WIN_HEIGHT - players[activePlayer].data.rec.height) {
                 velocity = 0;
-                if (activePlayer == 0) { scarfyData.pos.y = WIN_HEIGHT - scarfyData.rec.height; }
-                if (activePlayer == 1) { santaData.pos.y = WIN_HEIGHT - santaData.rec.height; }
+                players[activePlayer].data.pos.y = WIN_HEIGHT - players[activePlayer].data.rec.height;
                 jumping = false;
                 // doubleJump = false;
             } else {
@@ -195,8 +211,10 @@ int main()
         }
 
         // draw characters
-        if (activePlayer == 0) { DrawTextureRec(scarfy, scarfyData.rec, scarfyData.pos, WHITE); }
-        if (activePlayer == 1) { DrawTextureRec(santa, santaData.rec, santaData.pos, WHITE);}
+        DrawTextureRec(players[activePlayer].name,
+                       players[activePlayer].data.rec, 
+                       players[activePlayer].data.pos, 
+                       WHITE);
         
         // draw nebulas
         DrawTextureRec(nebula, neb1Data.rec, neb1Data.pos, WHITE);
@@ -206,6 +224,8 @@ int main()
     }
     UnloadTexture(scarfy);
     UnloadTexture(santa);
+    UnloadTexture(players[0].name);
+    UnloadTexture(players[1].name);
     UnloadTexture(nebula);
     CloseWindow();
 }
