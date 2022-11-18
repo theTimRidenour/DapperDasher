@@ -22,19 +22,19 @@ int main()
         // santa
         Texture2D santa = LoadTexture("textures/santa.png");
         AnimData santaData {{0.0, 0.0, (float)santa.width/11, (float)santa.height/2}, /* rec */
-            {(WIN_WIDTH/2) - (santaData.rec.width/2), WIN_HEIGHT - santaData.rec.height}}; // pos
+            {(float)((WIN_WIDTH/2) - (santa.width/22)), (float)(WIN_HEIGHT - (santa.height/2))}}; // pos
 
         // scarfy
         Texture2D scarfy = LoadTexture("textures/scarfy.png");
         AnimData scarfyData {{0.0, 0.0, (float)scarfy.width/6, (float)scarfy.height}, /* rec */
-            {(WIN_WIDTH/2) - (scarfyData.rec.width/2), WIN_HEIGHT - scarfyData.rec.height}, /* pos */
+            {(float)((WIN_WIDTH/2) - (scarfy.width/12)), (float)(WIN_HEIGHT - scarfy.height)}, /* pos */
             0, 1.0/12.0, 0.0}; // frame, updateTime, runningTime
 
         // nedula 1
         Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
         AnimData neb1Data {{0.0, 0.0, (float)nebula.width/8, (float)nebula.height/8}, /* rec */
-            {WIN_WIDTH - neb1Data.rec.width, WIN_HEIGHT - neb1Data.rec.height}, /* pos */
-            0, 1.0/12.0, 0.0}; // frame, updateTime, runningTome
+            {WIN_WIDTH, (float)(WIN_HEIGHT - (nebula.height/8))}, /* pos */
+            0, 1.0/12.0, 0.0}; // frame, updateTime, runningTime
 
         // nebula 2
         AnimData neb2Data {neb1Data.rec, {WIN_WIDTH + 300, neb1Data.pos.y}, /* rec, pos */
@@ -50,7 +50,7 @@ int main()
     // bool doubleJump = false;
 
     // active player (0 = scarfy, 1 = santa)
-    int activePlayer{1};
+    int activePlayer{0};
 
     SetTargetFPS(60);
 
