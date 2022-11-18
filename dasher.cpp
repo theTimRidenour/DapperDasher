@@ -13,8 +13,13 @@ int main()
     // animation frame
     int frame = 0;
     int nebFrame = 0;
+    int neb2Frame = 0;
     const float updateTime = 1.0/12.0;
+    const float nebUpdateTime{1.0/12.0};
+    const float neb2UpdateTime{1.0/12.0};
     float runningTime = 0.0;
+    float nebRunningTime{0.0};
+    float neb2RunningTime{0.0};
 
     // textures
         // santa
@@ -31,6 +36,9 @@ int main()
         Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
         Rectangle nebRec{0.0, 0.0, nebula.width/8, nebula.height/8};
         Vector2 nebPos{WIN_WIDTH - nebRec.width, WIN_HEIGHT - nebRec.height};
+
+        Rectangle neb2Rec{0.0, 0.0, nebula.width/8, nebula.height/8};
+        Vector2 neb2Pos{WIN_WIDTH + 300, WIN_HEIGHT - neb2Rec.height};
 
     // nebula X velocity (pixels/second)
     int nebVel{-200};
@@ -53,10 +61,11 @@ int main()
         ClearBackground(WHITE);
         const float dT{ GetFrameTime() };
         runningTime += dT;
+        nebRunningTime += dT;
+        neb2RunningTime += dT;
 
-        // update animation frames
-        if ( runningTime >= updateTime) {
-
+        // update animation frames for characters
+        if (runningTime >= updateTime) {
             if (activePlayer == 0) { scarfyRec.x = frame * scarfyRec.width; }
             if (activePlayer == 1 && !jumping) {
                 santaRec.x = frame * santaRec.width;
@@ -69,7 +78,19 @@ int main()
                 }
                 santaRec.y = santaRec.height;
             }
+            if (!jumping) { frame++; }
 
+            // frame update for scarfy
+            if (frame > 5 && activePlayer == 0) { frame = 0; }
+
+            // frame update for santa
+            if (frame > 10 && activePlayer == 1) { frame = 0; }
+            
+            runningTime = 0.0;
+        }
+
+        // update animation frames from nebula
+        if (nebRunningTime >= updateTime) {
             if (nebFrame >= 56) {
                 nebRec.y = 7 * nebRec.height;
                 nebRec.x = (nebFrame - 56) * nebRec.width;
@@ -96,19 +117,10 @@ int main()
                 nebRec.x = nebFrame * nebRec.width;
             }
 
-            if (!jumping) { frame++; }
-
-            // frame update for scarfy
-            if (frame > 5 && activePlayer == 0) { frame = 0; }
-
-            // frame update for santa
-            if (frame > 10 && activePlayer == 1) { frame = 0; }
-
             // frame update for nebula
             nebFrame++;
             if (nebFrame > 60) { nebFrame = 0; }
-
-            runningTime = 0.0;
+            nebRunningTime = 0.0;
         }
 
         // update nebula position
