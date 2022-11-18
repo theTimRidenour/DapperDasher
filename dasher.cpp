@@ -21,49 +21,24 @@ int main()
     // textures
         // santa
         Texture2D santa = LoadTexture("textures/santa.png");
-        AnimData santaData;
-            santaData.rec.width = santa.width/11;
-            santaData.rec.height = santa.height/2;
-            santaData.rec.x = 0;
-            santaData.rec.y = 0;
-            santaData.pos.x = (WIN_WIDTH/2) - (santaData.rec.width/2);
-            santaData.pos.y = WIN_HEIGHT - santaData.rec.height;
+        AnimData santaData {{0.0, 0.0, (float)santa.width/11, (float)santa.height/2}, /* rec */
+            {(WIN_WIDTH/2) - (santaData.rec.width/2), WIN_HEIGHT - santaData.rec.height}}; // pos
 
         // scarfy
         Texture2D scarfy = LoadTexture("textures/scarfy.png");
-        AnimData scarfyData;
-            scarfyData.rec.width = scarfy.width/6;
-            scarfyData.rec.height = scarfy.height;
-            scarfyData.rec.x = 0;
-            scarfyData.rec.y = 0;
-            scarfyData.pos.x = (WIN_WIDTH/2) - (scarfyData.rec.width/2);
-            scarfyData.pos.y = WIN_HEIGHT - scarfyData.rec.height;
-            scarfyData.frame = 0;
-            scarfyData.updateTime = 1.0/12.0;
-            scarfyData.runningTime = 0.0;
+        AnimData scarfyData {{0.0, 0.0, (float)scarfy.width/6, (float)scarfy.height}, /* rec */
+            {(WIN_WIDTH/2) - (scarfyData.rec.width/2), WIN_HEIGHT - scarfyData.rec.height}, /* pos */
+            0, 1.0/12.0, 0.0}; // frame, updateTime, runningTime
 
-        // nedula
+        // nedula 1
         Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
-        AnimData neb1Data;
-            neb1Data.rec.width = nebula.width/8;
-            neb1Data.rec.height = nebula.height/8;
-            neb1Data.rec.x = 0;
-            neb1Data.rec.y = 0;
-            neb1Data.pos.x = WIN_WIDTH - neb1Data.rec.width;
-            neb1Data.pos.y = WIN_HEIGHT - neb1Data.rec.height;
-            neb1Data.frame = 0;
-            neb1Data.updateTime = 1.0/12.0;
-            neb1Data.runningTime = 0.0;
-        AnimData neb2Data;
-            neb2Data.rec.width = neb1Data.rec.width;
-            neb2Data.rec.height = neb1Data.rec.height;
-            neb2Data.rec.x = 0;
-            neb2Data.rec.y = 0;
-            neb2Data.pos.x = WIN_WIDTH + 300;
-            neb2Data.pos.y = neb1Data.pos.y;
-            neb2Data.frame = 0;
-            neb2Data.updateTime = 1.0/16.0;
-            neb2Data.runningTime = 0.0;
+        AnimData neb1Data {{0.0, 0.0, (float)nebula.width/8, (float)nebula.height/8}, /* rec */
+            {WIN_WIDTH - neb1Data.rec.width, WIN_HEIGHT - neb1Data.rec.height}, /* pos */
+            0, 1.0/12.0, 0.0}; // frame, updateTime, runningTome
+
+        // nebula 2
+        AnimData neb2Data {neb1Data.rec, {WIN_WIDTH + 300, neb1Data.pos.y}, /* rec, pos */
+            0, 1.0/16.0, 0.0}; // frame, updateTime, runningTime
 
     // nebula X velocity (pixels/second)
     int nebVel{-200};
