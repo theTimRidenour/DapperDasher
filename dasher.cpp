@@ -49,8 +49,8 @@ int main()
             0, 1.0/12.0, 0.0 // frame, updateTime, runningTime
         };
 
-        AnimData nebulae[3];
-        int nebSize = sizeof(nebulae)/sizeof(nebulae[0]);
+        int nebSize{3};
+        AnimData nebulae[nebSize];
         for (int i = 0; i < nebSize; i++) { nebulae[i] = nebDataTemp; }
             nebulae[1].pos.x += 300;
             nebulae[1].updateTime = 1.0/16.0;
